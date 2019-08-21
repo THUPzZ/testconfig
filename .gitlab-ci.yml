@@ -1,0 +1,38 @@
+stages :
+  - build
+#  - test
+  - release
+#  - deploy
+
+#stage build
+node-build:
+  stage: build
+  image: node:10-alpine
+  script: 
+    - rm package-lock.json
+    - npm install
+    # - npm run dev 
+    - npm run build
+  cache:
+    key: cache-node
+    paths: 
+      - cicdtest/node_modules/
+      - cicdtest/dist/cicdtest/
+  only: 
+    - master
+#stage release
+release-nginx:
+  stage: release
+  image: docker:latest
+  # services:
+  #   - docker:dind
+  cache:
+    key: cache-node
+    paths:
+      - cicdtest/dist/cicdtest/
+    policy: pull
+  script:
+    #- docker build -t test:nginx -f Dockerfile .
+    - docker run --name mynginx -d -p 8000:80 nginx
+  only:
+    - master
